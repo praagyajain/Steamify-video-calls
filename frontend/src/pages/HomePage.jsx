@@ -101,6 +101,10 @@ const HomePage = () => {
               {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
+                const profilePicUrl = user.profilePic?.startsWith("http")
+                  ? user.profilePic
+                  : `http://localhost:5001${user.profilePic}`;
+
                 return (
                   <div
                     key={user._id}
@@ -109,7 +113,7 @@ const HomePage = () => {
                     <div className="card-body p-5 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="avatar size-16 rounded-full">
-                          <img src={user.profilePic} alt={user.fullName} />
+                          <img src={profilePicUrl} alt={user.fullName} />
                         </div>
 
                         <div>

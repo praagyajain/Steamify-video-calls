@@ -1,9 +1,15 @@
 import { axiosInstance } from "./axios";
 
 export const signup = async (signupData) => {
-  const response = await axiosInstance.post("/auth/signup", signupData);
+  const response = await axiosInstance.post("/auth/signup", signupData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    withCredentials: true,
+  });
   return response.data;
 };
+
 
 export const login = async (loginData) => {
   const response = await axiosInstance.post("/auth/login", loginData);

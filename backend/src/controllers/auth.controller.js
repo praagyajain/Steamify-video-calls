@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 export async function signup(req, res) {
   const { email, password, fullName } = req.body;
+ // Use uploaded file path if available
 
   try {
     if (!email || !password || !fullName) {
@@ -25,15 +26,25 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Email already exists, please use a diffrent one" });
     }
 
-    const idx = Math.floor(Math.random() * 100) + 1; // generate a num between 1-100
-    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
+    // Use uploaded profile picture if available
+const uploadedProfilePic = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const newUser = await User.create({
-      email,
-      fullName,
-      password,
-      profilePic: randomAvatar,
-    });
+const sources = [
+  id => `https://api.dicebear.com/8.x/bottts/svg?seed=${id}`,
+  id => `https://robohash.org/${id}.png`,
+  id => `https://api.multiavatar.com/${id}.svg`,
+];
+const randomId = Math.floor(Math.random() * 1000);
+const randomSource = sources[Math.floor(Math.random() * sources.length)];
+const profilePic = uploadedProfilePic || randomSource(randomId);
+
+const newUser = await User.create({
+  email,
+  fullName,
+  password,
+  profilePic,
+});
+
 
     try {
       await upsertStreamUser({

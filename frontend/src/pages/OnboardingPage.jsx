@@ -3,7 +3,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
-import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon } from "lucide-react";
+import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon, CameraIcon } from "lucide-react";
 import { LANGUAGES } from "../constants";
 
 const OnboardingPage = () => {
@@ -25,7 +25,6 @@ const OnboardingPage = () => {
       toast.success("Profile onboarded successfully");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
-
     onError: (error) => {
       toast.error(error.response.data.message);
     },
@@ -33,17 +32,21 @@ const OnboardingPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     onboardingMutation(formState);
   };
 
   const handleRandomAvatar = () => {
-    const idx = Math.floor(Math.random() * 100) + 1; // 1-100 included
+    const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-
     setFormState({ ...formState, profilePic: randomAvatar });
     toast.success("Random profile picture generated!");
   };
+
+  const profilePicUrl = formState.profilePic
+    ? formState.profilePic.startsWith("http")
+      ? formState.profilePic
+      : `http://localhost:5001${formState.profilePic}`
+    : "/default-avatar.png";
 
   return (
     <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
@@ -52,24 +55,17 @@ const OnboardingPage = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">Complete Your Profile</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* PROFILE PIC CONTAINER */}
+            {/* PROFILE PIC PREVIEW */}
             <div className="flex flex-col items-center justify-center space-y-4">
-              {/* IMAGE PREVIEW */}
               <div className="size-32 rounded-full bg-base-300 overflow-hidden">
-                {formState.profilePic ? (
-                  <img
-                    src={formState.profilePic}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <CameraIcon className="size-12 text-base-content opacity-40" />
-                  </div>
-                )}
+                <img
+                  src={profilePicUrl}
+                  alt="Profile Preview"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              {/* Generate Random Avatar BTN */}
+              {/* Random Avatar Button */}
               <div className="flex items-center gap-2">
                 <button type="button" onClick={handleRandomAvatar} className="btn btn-accent">
                   <ShuffleIcon className="size-4 mr-2" />
@@ -109,7 +105,7 @@ const OnboardingPage = () => {
 
             {/* LANGUAGES */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* NATIVE LANGUAGE */}
+              {/* Native Language */}
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Native Language</span>
@@ -129,7 +125,7 @@ const OnboardingPage = () => {
                 </select>
               </div>
 
-              {/* LEARNING LANGUAGE */}
+              {/* Learning Language */}
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Learning Language</span>
@@ -168,8 +164,7 @@ const OnboardingPage = () => {
               </div>
             </div>
 
-            {/* SUBMIT BUTTON */}
-
+            {/* Submit Button */}
             <button className="btn btn-primary w-full" disabled={isPending} type="submit">
               {!isPending ? (
                 <>
@@ -189,4 +184,5 @@ const OnboardingPage = () => {
     </div>
   );
 };
+
 export default OnboardingPage;

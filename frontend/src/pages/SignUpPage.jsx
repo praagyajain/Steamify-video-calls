@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router";
-
 import useSignUp from "../hooks/useSignUp";
 
 const SignUpPage = () => {
@@ -9,25 +8,23 @@ const SignUpPage = () => {
     fullName: "",
     email: "",
     password: "",
+    profilePic: null, // new field for profile picture file
   });
 
-  // This is how we did it at first, without using our custom hook
-  // const queryClient = useQueryClient();
-  // const {
-  //   mutate: signupMutation,
-  //   isPending,
-  //   error,
-  // } = useMutation({
-  //   mutationFn: signup,
-  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-  // });
-
-  // This is how we did it using our custom hook - optimized version
   const { isPending, error, signupMutation } = useSignUp();
 
   const handleSignup = (e) => {
     e.preventDefault();
-    signupMutation(signupData);
+
+    const formData = new FormData();
+    formData.append("fullName", signupData.fullName);
+    formData.append("email", signupData.email);
+    formData.append("password", signupData.password);
+    if (signupData.profilePic) {
+      formData.append("profilePic", signupData.profilePic);
+    }
+
+    signupMutation(formData);
   };
 
   return (
@@ -49,7 +46,7 @@ const SignUpPage = () => {
           {/* ERROR MESSAGE IF ANY */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{error.response?.data?.message || "An error occurred"}</span>
             </div>
           )}
 
@@ -74,10 +71,13 @@ const SignUpPage = () => {
                       placeholder="John Doe"
                       className="input input-bordered w-full"
                       value={signupData.fullName}
-                      onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({ ...signupData, fullName: e.target.value })
+                      }
                       required
                     />
                   </div>
+
                   {/* EMAIL */}
                   <div className="form-control w-full">
                     <label className="label">
@@ -88,10 +88,13 @@ const SignUpPage = () => {
                       placeholder="john@gmail.com"
                       className="input input-bordered w-full"
                       value={signupData.email}
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({ ...signupData, email: e.target.value })
+                      }
                       required
                     />
                   </div>
+
                   {/* PASSWORD */}
                   <div className="form-control w-full">
                     <label className="label">
@@ -102,7 +105,9 @@ const SignUpPage = () => {
                       placeholder="********"
                       className="input input-bordered w-full"
                       value={signupData.password}
-                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                      onChange={(e) =>
+                        setSignupData({ ...signupData, password: e.target.value })
+                      }
                       required
                     />
                     <p className="text-xs opacity-70 mt-1">
@@ -110,6 +115,22 @@ const SignUpPage = () => {
                     </p>
                   </div>
 
+                  {/* PROFILE PICTURE UPLOAD */}
+                  <div className="form-control w-full">
+                    <label className="label">
+                      <span className="label-text">Profile Picture (optional)</span>
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="file-input file-input-bordered w-full"
+                      onChange={(e) =>
+                        setSignupData({ ...signupData, profilePic: e.target.files[0] })
+                      }
+                    />
+                  </div>
+
+                  {/* Terms Checkbox */}
                   <div className="form-control">
                     <label className="label cursor-pointer justify-start gap-2">
                       <input type="checkbox" className="checkbox checkbox-sm" required />
@@ -151,7 +172,11 @@ const SignUpPage = () => {
           <div className="max-w-md p-8">
             {/* Illustration */}
             <div className="relative aspect-square max-w-sm mx-auto">
-              <img src="/i.png" alt="Language connection illustration" className="w-full h-full" />
+              <img
+                src="/i.png"
+                alt="Language connection illustration"
+                className="w-full h-full"
+              />
             </div>
 
             <div className="text-center space-y-3 mt-6">
